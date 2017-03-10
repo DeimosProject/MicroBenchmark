@@ -5,18 +5,6 @@ namespace Deimos\MicroBenchmark;
 class BenchmarkResult
 {
     /**
-     * BenchmarkResult constructor
-     *
-     * @param array $time
-     * @param array $memory
-     */
-    public function __construct(array $time, array $memory)
-    {
-        $this->time = $time;
-        $this->memory = $memory;
-    }
-
-    /**
      * @var array
      */
     protected $time = [];
@@ -25,6 +13,37 @@ class BenchmarkResult
      * @var array
      */
     protected $memory = [];
+
+    /**
+     * @var \Throwable
+     */
+    protected $debug;
+
+    /**
+     * BenchmarkResult constructor
+     *
+     * @param array           $time
+     * @param array           $memory
+     * @param null|\Throwable $debug
+     */
+    public function __construct(array $time, array $memory, $debug = null)
+    {
+        $this->time   = $time;
+        $this->memory = $memory;
+
+        $this->debug = $debug;
+    }
+
+    protected function traceDebug()
+    {
+        return $this->debug instanceof \Throwable ? [
+            'message' => $this->debug->getMessage(),
+            'code' => $this->debug->getCode(),
+            'trace' => $this->debug->getTraceAsString(),
+            'file' => $this->debug->getFile(),
+            'line' => $this->debug->getLine(),
+        ] : null;
+    }
 
     /**
      * @return array
@@ -43,6 +62,14 @@ class BenchmarkResult
     }
 
     /**
+     * @return null|\Throwable
+     */
+    public function debug()
+    {
+        return $this->debug;
+    }
+
+    /**
      * @return array
      */
     public function extensions()
@@ -55,6 +82,7 @@ class BenchmarkResult
         return [
             'memory' => $this->memory(),
             'time' => $this->time(),
+            'debug' => $this->traceDebug()
         ];
     }
 }

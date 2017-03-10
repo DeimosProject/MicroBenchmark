@@ -27,14 +27,26 @@ class Benchmark
     public static function task($iterations, callable $callback)
     {
         set_time_limit(0);
-
-        $iterator = 0;
         $memory   = \memory_get_usage();
-        $time     = \microtime(true);
+        $time = 0;
 
-        while ($iterator < $iterations)
+        $e = null;
+
+        try
         {
-            $callback($iterator++);
+            set_time_limit(0);
+
+            $iterator = 0;
+            $memory   = \memory_get_usage();
+            $time     = \microtime(true);
+
+            while ($iterator < $iterations)
+            {
+                $callback($iterator++);
+            }
+        }
+        catch (\Throwable $e)
+        {
         }
 
         $stopTime       = \microtime(true);
@@ -52,7 +64,8 @@ class Benchmark
                 'usage'     => $stopMemory - $memory,
                 'realUsage' => $stopMemoryReal,
                 'peakUsage' => $stopMemoryPeak,
-            ]
+            ],
+            $e
         );
     }
 
